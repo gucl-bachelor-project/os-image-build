@@ -1,0 +1,79 @@
+version: 2
+
+defaults: &defaults
+  working_directory: ~/packer
+  docker:
+    - image: gustavkc/packer-with-ansible:latest
+
+jobs:
+  checkout:
+    <<: *defaults
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/packer
+      - persist_to_workspace:
+          root: .
+          paths: .
+  validate:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/packer
+      - run:
+          name: Validate
+          command: packer validate -var "do_api_token=$DO_API_TOKEN" -var "aws_access_key_id=$AWS_ACCESS_KEY_ID" -var "aws_secret_access_key=$AWS_ACCESS_KEY_SECRET" main.json
+  build:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/packer
+      - run:
+          name: Build
+          command: packer build -var "do_api_token=$DO_API_TOKEN" -var "aws_access_key_id=$AWS_ACCESS_KEY_ID" -var "aws_secret_access_key=$AWS_ACCESS_KEY_SECRET" main.json
+  cleanup:
+    <<: *defaults
+    steps:
+      - run:
+          name: Install doctl
+          command: |
+            cd ~
+            wget https://github.com/digitalocean/doctl/releases/download/v1.38.0/doctl-1.38.0-linux-amd64.tar.gz
+            tar xf ~/doctl-1.38.0-linux-amd64.tar.gz
+            mv ~/doctl /usr/local/bin
+      - run:
+          name: doctl authentication
+          command: |
+            echo 'export DIGITALOCEAN_ACCESS_TOKEN=$DO_API_TOKEN' >> $BASH_ENV
+            source $BASH_ENV
+            doctl auth init
+      - run:
+          name: Delete all snapshots other than latest
+          command: doctl compute snapshot list 'gkc-bproject-packer-*' --format "ID, CreatedAt" | sed -n '1!p' | sort -rn -k 2n | awk '{print $1}' | sed -n '1!p' | while read -r line; do doctl compute snapshot delete "$line" --force; done
+
+workflows:
+  version: 2
+  validate-test-deploy:
+    jobs:
+      - checkout:
+          filters:
+            tags:
+              only: /.*/
+      - validate:
+          requires:
+            - checkout
+          filters:
+            tags:
+              only: /.*/
+      - build:
+          requires:
+            - validate
+          filters:
+            tags:
+              only: /.*/
+      - cleanup:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /.*/

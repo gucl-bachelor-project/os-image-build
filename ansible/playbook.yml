@@ -1,0 +1,66 @@
+- hosts: all
+  become: true
+  tasks:
+    - name: Update and upgrade apt packages
+      apt:
+        upgrade: yes
+        update_cache: yes
+        cache_valid_time: 86400 # One day
+
+    - name: Install aptitude using apt # Preferred by Ansible as an alternative to the apt package manager
+      apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
+
+    - name: Install required system packages
+      apt: name={{ item }} state=latest update_cache=yes
+      loop:
+        [
+          "apt-transport-https",
+          "ca-certificates",
+          "curl",
+          "software-properties-common",
+          "python3-pip",
+          "virtualenv",
+          "python3-setuptools",
+          "unzip",
+          "gnupg2",
+          "pass",
+        ]
+
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu bionic stable
+        state: present
+
+    - name: Update apt and install docker-ce
+      apt: update_cache=yes name=docker-ce state=latest
+
+    - name: Download AWS CLI V2
+      unarchive:
+        src: https://d1vvhvl2y92vvt.cloudfront.net/awscli-exe-linux-x86_64.zip
+        dest: /
+        remote_src: yes
+
+    - name: Install AWS CLI V2
+      command: /aws/install --update
+
+    - name: Download and install Docker Compose
+      get_url:
+        url: https://github.com/docker/compose/releases/download/1.25.4/docker-compose-Linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: 0755
+
+    - name: Copy service bootstrap script
+      copy:
+        src: service-bootstrap.sh
+        dest: /usr/local/bin/service-bootstrap
+        mode: 0777
+
+    - name: Ensure app folder exists
+      file:
+        path: /usr/local/app
+        state: directory
