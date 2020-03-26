@@ -22,7 +22,7 @@ jobs:
           at: ~/packer
       - run:
           name: Validate
-          command: packer validate -var "do_api_token=$DO_API_TOKEN" -var "aws_access_key_id=$AWS_ACCESS_KEY_ID" -var "aws_secret_access_key=$AWS_ACCESS_KEY_SECRET" main.json
+          command: packer validate -var "do_api_token=$DO_API_TOKEN" main.json
   build:
     <<: *defaults
     steps:
@@ -30,7 +30,7 @@ jobs:
           at: ~/packer
       - run:
           name: Build
-          command: packer build -var "do_api_token=$DO_API_TOKEN" -var "aws_access_key_id=$AWS_ACCESS_KEY_ID" -var "aws_secret_access_key=$AWS_ACCESS_KEY_SECRET" main.json
+          command: packer build -var "do_api_token=$DO_API_TOKEN" main.json
   cleanup:
     <<: *defaults
     steps:
