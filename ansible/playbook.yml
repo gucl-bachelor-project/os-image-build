@@ -78,8 +78,10 @@
 
     - gem:
         name: serverspec
+        user_install: no
         state: latest
 
     - gem:
         name: docker
+        user_install: no
         state: latest
