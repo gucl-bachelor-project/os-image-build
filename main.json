@@ -14,6 +14,13 @@
                 "ANSIBLE_SSH_ARGS='-o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s'",
                 "ANSIBLE_NOCOLOR=True"
             ]
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "cd /root/tmp/tests/",
+                "rake spec"
+            ]
         }
     ],
     "builders": [

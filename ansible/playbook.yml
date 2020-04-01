@@ -24,6 +24,7 @@
           "unzip",
           "gnupg2",
           "pass",
+          "ruby",
         ]
 
     - name: Add Docker GPG apt Key
@@ -64,3 +65,21 @@
       file:
         path: /usr/local/app
         state: directory
+
+    - name: Ensure serverspec test folder exists
+      file:
+        path: /root/tmp/tests
+        state: directory
+
+    - name: Copy test files
+      copy:
+        src: tests/
+        dest: /root/tmp/tests
+
+    - gem:
+        name: serverspec
+        state: latest
+
+    - gem:
+        name: docker
+        state: latest
