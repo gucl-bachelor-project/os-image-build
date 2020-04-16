@@ -30,7 +30,14 @@ jobs:
           at: ~/packer
       - run:
           name: Build
-          command: packer build -var "do_api_token=$DO_API_TOKEN" main.json
+          command: packer build -var "do_api_token=$DO_API_TOKEN" -machine-readable main.json | tee build.log
+      - run:
+          name: Save build artifact ID
+          command: |
+            grep 'artifact,0,id' build.log | cut -d, -f6 | cut -d: -f2 > /tmp/image-artifact-id.txt
+      - store_artifacts:
+          path: /tmp/image-artifact-id.txt
+          destination: image-artifact-id.txt
   cleanup:
     <<: *defaults
     steps:
