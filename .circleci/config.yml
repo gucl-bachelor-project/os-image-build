@@ -34,10 +34,11 @@ jobs:
       - run:
           name: Save build artifact ID
           command: |
-            grep 'artifact,0,id' build.log | cut -d, -f6 | cut -d: -f2 > /tmp/image-artifact-id.txt
-      - store_artifacts:
-          path: /tmp/image-artifact-id.txt
-          destination: image-artifact-id.txt
+            grep 'artifact,0,id' build.log | cut -d, -f6 | cut -d: -f2 > image-artifact-id.txt
+      - persist_to_workspace:
+          root: .
+          paths:
+            - image-artifact-id.txt
   cleanup:
     <<: *defaults
     steps:
@@ -57,10 +58,17 @@ jobs:
       - run:
           name: Delete all snapshots other than latest
           command: doctl compute snapshot list 'gkc-bproject-packer-*' --format "ID, CreatedAt" | sed -n '1!p' | sort -rn -k 2n | awk '{print $1}' | sed -n '1!p' | while read -r line; do doctl compute snapshot delete "$line" --force; done
-
+  publish:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/packer
+      - store_artifacts:
+          path: image-artifact-id.txt
+          destination: image-artifact-id.txt
 workflows:
   version: 2
-  validate-test-deploy:
+  validate-test-publish:
     jobs:
       - checkout:
           filters:
@@ -79,6 +87,12 @@ workflows:
             tags:
               only: /.*/
       - cleanup:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /.*/
+      - publish:
           requires:
             - build
           filters:
