@@ -55,10 +55,10 @@
         dest: /usr/local/bin/docker-compose
         mode: 0755
 
-    - name: Copy service bootstrap script
+    - name: Copy start application script
       copy:
-        src: service-bootstrap.sh
-        dest: /usr/local/bin/service-bootstrap
+        src: start-application.sh
+        dest: /usr/local/bin/start-application
         mode: 0777
 
     - name: Ensure app folder exists

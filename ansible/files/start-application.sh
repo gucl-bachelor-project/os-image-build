@@ -27,6 +27,6 @@ fi
 # Run docker-compose to run service
 docker-compose -f /usr/local/app/docker-compose.yml -f /usr/local/app/docker-compose.prod.yml up -d
 if [ $? -ne 0 ]; then
-  echo 'Failed to bring up service with docker-compose. Exiting...'
+  echo 'Failed to bring up application with docker-compose. Exiting...'
   exit 1
 fi
