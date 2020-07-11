@@ -26,7 +26,7 @@
     "builders": [
         {
             "type": "digitalocean",
-            "snapshot_name": "gkc-bproject-packer-{{timestamp}}",
+            "snapshot_name": "bproject-app-vm-image-{{timestamp}}",
             "api_token": "{{ user `do_api_token` }}",
             "image": "ubuntu-18-04-x64",
             "region": "fra1",
