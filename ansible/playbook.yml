@@ -25,6 +25,7 @@
           "gnupg2",
           "pass",
           "ruby",
+          "s3cmd",
         ]
 
     - name: Add Docker GPG apt Key

@@ -17,6 +17,11 @@ describe 'Test base configuration' do
         its(:exit_status) { should eq 0 }
     end
 
+    # Test that s3cmd is installed and available as CLI tool
+    describe command('which s3cmd') do
+        its(:exit_status) { should eq 0 }
+    end
+
     # Test that custom script to start application is installed and available as CLI tool
     describe command('which start-application') do
         its(:exit_status) { should eq 0 }
