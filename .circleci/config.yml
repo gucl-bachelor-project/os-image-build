@@ -72,29 +72,17 @@ workflows:
     jobs:
       - checkout:
           filters:
-            tags:
-              only: /.*/
+            branches:
+              only: master
       - validate:
           requires:
             - checkout
-          filters:
-            tags:
-              only: /.*/
       - build:
           requires:
             - validate
-          filters:
-            tags:
-              only: /.*/
       - cleanup:
           requires:
             - build
-          filters:
-            tags:
-              only: /.*/
       - publish:
           requires:
             - build
-          filters:
-            tags:
-              only: /.*/
